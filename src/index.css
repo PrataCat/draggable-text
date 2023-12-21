@@ -1,0 +1,52 @@
+.app-form {
+  max-width: 480px;
+  padding: 12px;
+
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+
+  background-color: #f1f1f1;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  border-radius: 4px;
+}
+
+.app-form-label {
+  display: flex;
+  flex-direction: column;
+}
+
+.app-form-textarea {
+}
+
+.app-form-btn {
+  height: 30px;
+  padding: 8px;
+
+  display: inline-block;
+
+  border: 1px solid blue;
+  border-radius: 4px;
+  outline: transparent;
+  cursor: pointer;
+}
+
+.app-form-btn:hover,
+.app-form-btn:focus {
+  border: 2px solid green;
+}
+
+.movable-element {
+  display: inline-block;
+  margin: 4px;
+
+  background-color: lightcoral;
+
+  font-size: 40px;
+  cursor: grab;
+  user-select: none;
+}
+
+.fixed-element {
+  position: absolute;
+}
