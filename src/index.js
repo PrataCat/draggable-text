@@ -11,6 +11,8 @@ let data = {
 
 let moveObjects = null;
 
+let isMoving = false;
+
 //----------------call func---------------------------
 getSerializedData();
 
@@ -90,21 +92,24 @@ function addListenerOnLetter() {
     let shiftY = 0;
 
     function moveAt(e) {
+      isMoving = true;
       obj.style.left = e.pageX - shiftX + "px";
       obj.style.top = e.pageY - shiftY + "px";
     }
 
     obj.addEventListener("mousedown", function (e) {
-      obj.style.cursor = "grabbing";
-
-      shiftX = e.clientX - obj.getBoundingClientRect().left;
-      shiftY = e.clientY - obj.getBoundingClientRect().top;
-      document.addEventListener("mousemove", moveAt);
-    });
-
-    document.addEventListener("mouseup", function () {
-      document.removeEventListener("mousemove", moveAt);
-      obj.style.cursor = "grab";
+      if (isMoving) {
+        document.addEventListener("mouseup", function () {
+          document.removeEventListener("mousemove", moveAt);
+          isMoving = false;
+          obj.style.cursor = "grab";
+        });
+      } else {
+        obj.style.cursor = "grabbing";
+        shiftX = e.clientX - obj.getBoundingClientRect().left;
+        shiftY = e.clientY - obj.getBoundingClientRect().top;
+        document.addEventListener("mousemove", moveAt);
+      }
     });
   });
 }
