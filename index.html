@@ -3,8 +3,14 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Roboto:wght@700&display=swap"
+      rel="stylesheet"
+    />
     <link rel="stylesheet" href="./src/index.css" />
-    <title>Document</title>
+    <title>Draggable text</title>
   </head>
   <body>
     <form id="appform" autocomplete="off" class="app-form">
@@ -17,7 +23,12 @@
           class="app-form-textarea"
         ></textarea>
       </label>
-      <button id="formbtn" type="submit" class="app-form-btn">Submit</button>
+      <button id="formbtn" type="submit" class="app-form-btn submit-btn">
+        Submit
+      </button>
+      <button id="formbtn-reset" type="reset" class="app-form-btn reset-btn">
+        Reset
+      </button>
     </form>
     <div id="output" class="output"></div>
     <script

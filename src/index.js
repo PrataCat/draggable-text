@@ -1,6 +1,7 @@
 const appForm = document.getElementById("appform");
 const userText = document.getElementById("usertext");
 const outputText = document.getElementById("output");
+const resetBtn = document.getElementById("formbtn-reset");
 
 //----------------const/let---------------------------
 const storageKey = "form-state";
@@ -22,6 +23,7 @@ getSerializedData();
 //----------------EventListeners---------------------------
 userText.addEventListener("input", _.throttle(setCurrentText, 1000));
 appForm.addEventListener("submit", onSubmit);
+resetBtn.addEventListener("click", onReset);
 
 //----------------functions---------------------------
 
@@ -213,4 +215,8 @@ function cancelDragstart() {
   moveObjects.ondragstart = function () {
     return false;
   };
+}
+
+function onReset() {
+  outputText.innerHTML = "";
 }
