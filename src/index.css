@@ -16,9 +16,6 @@
   flex-direction: column;
 }
 
-.app-form-textarea {
-}
-
 .app-form-btn {
   height: 30px;
   padding: 8px;
@@ -41,8 +38,10 @@
   margin: 4px;
 
   background-color: lightcoral;
+  border: 1px solid black;
+  border-radius: 4px;
 
-  font-size: 40px;
+  font-size: 80px;
   cursor: grab;
   user-select: none;
 }

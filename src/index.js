@@ -13,7 +13,8 @@ let coordsOfMovingObjX = null;
 let coordsOfMovingObjY = null;
 let isMoving = false;
 let currentObj = null;
-let marginObj = 4;
+const marginObj = 4;
+let currentDroppable = null;
 
 //----------------call func---------------------------
 getSerializedData();
@@ -85,8 +86,6 @@ function getCoords(obj) {
   coordsOfMovingObjY = coords.top;
 }
 
-let currentDroppable = null;
-
 function addListenerOnLetter() {
   moveObjects = document.querySelectorAll(".movable-element");
 
@@ -103,47 +102,8 @@ function addListenerOnLetter() {
   moveObjects.forEach(function (obj) {
     let shiftX = 0;
     let shiftY = 0;
-
-    function checkMovableBelow(e) {
-      obj.style.visibility = "hidden";
-      let objBelow = document.elementFromPoint(e.clientX, e.clientY);
-      obj.style.visibility = "visible";
-
-      if (!objBelow) return;
-
-      let movableBelow = objBelow.closest(".below");
-
-      if (currentDroppable != movableBelow) {
-        if (currentDroppable) {
-          leaveDroppable(currentDroppable);
-        }
-        currentDroppable = movableBelow;
-        if (currentDroppable) {
-          enterDroppable(currentDroppable);
-        }
-      }
-    }
-
-    function moveAt(e) {
-      isMoving = true;
-      obj.style.left = e.pageX - shiftX + "px";
-      obj.style.top = e.pageY - shiftY + "px";
-
-      checkMovableBelow(e);
-    }
-
-    function onMouseup(e) {
-      document.removeEventListener("mousemove", moveAt);
-      isMoving = false;
-      obj.style.cursor = "grab";
-      obj.style.zIndex = 0;
-      obj.classList.add("below");
-
-      if (!currentObj) return;
-      currentObj.style.left = coordsOfMovingObjX - marginObj + "px";
-      currentObj.style.top = coordsOfMovingObjY - marginObj + "px";
-      leaveDroppable(currentObj);
-    }
+    let shiftX2 = 0;
+    let shiftY2 = 0;
 
     obj.addEventListener("mousedown", function (e) {
       if (isMoving) {
@@ -155,10 +115,84 @@ function addListenerOnLetter() {
         obj.style.zIndex = 10;
         shiftX = e.clientX - obj.getBoundingClientRect().left;
         shiftY = e.clientY - obj.getBoundingClientRect().top;
+        shiftX2 = e.clientX - obj.getBoundingClientRect().right;
+        shiftY2 = e.clientY - obj.getBoundingClientRect().bottom;
         document.removeEventListener("mouseup", onMouseup);
-        document.addEventListener("mousemove", moveAt);
+        document.addEventListener("mousemove", onMousemove);
       }
     });
+
+    function checkMovableBelow(e) {
+      obj.style.visibility = "hidden";
+      let leftX = e.clientX - shiftX + marginObj;
+      let rightX = e.clientX - shiftX2 + marginObj;
+      let topY = e.clientY - shiftY + marginObj;
+      let bottomY = e.clientY - shiftY2 + marginObj;
+
+      let cursorBelow = document.elementFromPoint(e.clientX, e.clientY);
+      let leftTopBelow = document.elementFromPoint(leftX, topY);
+      let rightTopBelow = document.elementFromPoint(rightX, topY);
+      let rightBottomBelow = document.elementFromPoint(rightX, bottomY);
+      let leftBottomBelow = document.elementFromPoint(leftX, bottomY);
+      obj.style.visibility = "visible";
+
+      if (!cursorBelow) return;
+
+      let movableBelow = cursorBelow.closest(".below");
+      let movableBelowElem1 = leftTopBelow.closest(".below");
+      let movableBelowElem2 = rightTopBelow.closest(".below");
+      let movableBelowElem3 = rightBottomBelow.closest(".below");
+      let movableBelowElem4 = leftBottomBelow.closest(".below");
+
+      if (
+        currentDroppable != movableBelow ||
+        currentDroppable != movableBelowElem1 ||
+        currentDroppable != movableBelowElem2 ||
+        currentDroppable != movableBelowElem3 ||
+        currentDroppable != movableBelowElem4
+      ) {
+        if (currentDroppable) {
+          leaveDroppable(currentDroppable);
+        }
+
+        if (currentDroppable != movableBelow) {
+          currentDroppable = movableBelow;
+        } else if (currentDroppable != movableBelowElem1) {
+          currentDroppable = movableBelowElem1;
+        } else if (currentDroppable != movableBelowElem2) {
+          currentDroppable = movableBelowElem2;
+        } else if (currentDroppable != movableBelowElem3) {
+          currentDroppable = movableBelowElem3;
+        } else if (currentDroppable != movableBelowElem4) {
+          currentDroppable = movableBelowElem4;
+        }
+
+        if (currentDroppable) {
+          enterDroppable(currentDroppable);
+        }
+      }
+    }
+
+    function onMousemove(e) {
+      isMoving = true;
+      obj.style.left = e.pageX - shiftX + "px";
+      obj.style.top = e.pageY - shiftY + "px";
+
+      checkMovableBelow(e);
+    }
+
+    function onMouseup(e) {
+      document.removeEventListener("mousemove", onMousemove);
+      isMoving = false;
+      obj.style.cursor = "grab";
+      obj.style.zIndex = 0;
+      obj.classList.add("below");
+
+      if (!currentObj) return;
+      currentObj.style.left = coordsOfMovingObjX - marginObj + "px";
+      currentObj.style.top = coordsOfMovingObjY - marginObj + "px";
+      leaveDroppable(currentObj);
+    }
   });
 }
 
@@ -170,6 +204,7 @@ function enterDroppable(obj) {
 function leaveDroppable(obj) {
   obj.style.background = "";
   currentObj = null;
+  currentDroppable = null;
 }
 
 function cancelDragstart() {
