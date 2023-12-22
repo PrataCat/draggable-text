@@ -63,6 +63,7 @@ body {
 .output {
   display: flex;
   justify-content: center;
+  flex-wrap: wrap;
 }
 
 .movable-element {
