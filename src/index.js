@@ -8,10 +8,16 @@ const storageKey = "form-state";
 
 let data = {
   currentText: "",
+  textArr: [],
+  lastAddedText: [],
 };
-let moveObjects = null;
+let movableObjects = null;
 let coordsOfMovingObjX = null;
 let coordsOfMovingObjY = null;
+let shiftX = 0;
+let shiftY = 0;
+let shiftX2 = 0;
+let shiftY2 = 0;
 let isMoving = false;
 let currentObj = null;
 const marginObj = 4;
@@ -29,21 +35,27 @@ resetBtn.addEventListener("click", onReset);
 
 function onSubmit(e) {
   e.preventDefault();
-  let text = data.currentText;
+  let { currentText, textArr, lastAddedText } = data;
 
-  if (data.currentText.trim() === "") {
+  if (currentText.trim() === "") {
     alert("The field must be filled");
     return;
   }
 
-  text = userText.value;
+  const arr = currentText.split("");
+  data.lastAddedText = [...arr];
+  textArr.push(...arr);
 
-  const arr = text.split("");
+  try {
+    data.currentText = "";
+    setSerializedData();
+  } catch {
+    console.error("set err", error.message);
+  }
 
-  createMarkup(arr);
+  createMarkup(data.lastAddedText);
   addListenerOnLetter();
   e.currentTarget.reset();
-  localStorage.removeItem(storageKey);
 }
 
 function setCurrentText() {
@@ -65,10 +77,21 @@ function getSerializedData() {
       const parsedData = JSON.parse(getData);
       userText.value = parsedData.currentText;
       data.currentText = parsedData.currentText;
+      data.textArr = parsedData.textArr;
+
+      if (parsedData.textArr.length !== 0) {
+        createMarkup(parsedData.textArr);
+        addListenerOnLetter();
+      }
     }
   } catch (error) {
     console.error("get err", error.message);
   }
+}
+
+function setSerializedData() {
+  const serializedData = JSON.stringify(data);
+  localStorage.setItem(storageKey, serializedData);
 }
 
 function createMarkup(data) {
@@ -82,31 +105,12 @@ function createMarkup(data) {
   outputText.insertAdjacentHTML("afterbegin", markup);
 }
 
-function getCoords(obj) {
-  let coords = obj.getBoundingClientRect();
-  coordsOfMovingObjX = coords.left;
-  coordsOfMovingObjY = coords.top;
-}
-
 function addListenerOnLetter() {
-  moveObjects = document.querySelectorAll(".movable-element");
+  movableObjects = document.querySelectorAll(".movable-element");
 
-  moveObjects.forEach(function (obj) {
-    getCoords(obj);
-    obj.style.left = coordsOfMovingObjX + "px";
-    obj.style.top = coordsOfMovingObjY + "px";
-  });
+  setAbsolutePosition();
 
-  moveObjects.forEach(function (obj) {
-    obj.style.position = "absolute";
-  });
-
-  moveObjects.forEach(function (obj) {
-    let shiftX = 0;
-    let shiftY = 0;
-    let shiftX2 = 0;
-    let shiftY2 = 0;
-
+  movableObjects.forEach(function (obj) {
     obj.addEventListener("mousedown", function (e) {
       if (isMoving) {
         document.addEventListener("mouseup", onMouseup);
@@ -123,6 +127,27 @@ function addListenerOnLetter() {
         document.addEventListener("mousemove", onMousemove);
       }
     });
+
+    function onMousemove(e) {
+      isMoving = true;
+      obj.style.left = e.pageX - shiftX + "px";
+      obj.style.top = e.pageY - shiftY + "px";
+
+      checkMovableBelow(e);
+    }
+
+    function onMouseup() {
+      document.removeEventListener("mousemove", onMousemove);
+      isMoving = false;
+      obj.style.cursor = "grab";
+      obj.style.zIndex = 0;
+      obj.classList.add("below");
+
+      if (!currentObj) return;
+      currentObj.style.left = coordsOfMovingObjX - marginObj + "px";
+      currentObj.style.top = coordsOfMovingObjY - marginObj + "px";
+      leaveDroppable(currentObj);
+    }
 
     function checkMovableBelow(e) {
       obj.style.visibility = "hidden";
@@ -174,28 +199,25 @@ function addListenerOnLetter() {
         }
       }
     }
-
-    function onMousemove(e) {
-      isMoving = true;
-      obj.style.left = e.pageX - shiftX + "px";
-      obj.style.top = e.pageY - shiftY + "px";
-
-      checkMovableBelow(e);
-    }
-
-    function onMouseup(e) {
-      document.removeEventListener("mousemove", onMousemove);
-      isMoving = false;
-      obj.style.cursor = "grab";
-      obj.style.zIndex = 0;
-      obj.classList.add("below");
-
-      if (!currentObj) return;
-      currentObj.style.left = coordsOfMovingObjX - marginObj + "px";
-      currentObj.style.top = coordsOfMovingObjY - marginObj + "px";
-      leaveDroppable(currentObj);
-    }
   });
+}
+
+function setAbsolutePosition() {
+  movableObjects.forEach(function (obj) {
+    getCoords(obj);
+    obj.style.left = coordsOfMovingObjX + "px";
+    obj.style.top = coordsOfMovingObjY + "px";
+  });
+
+  movableObjects.forEach(function (obj) {
+    obj.style.position = "absolute";
+  });
+}
+
+function getCoords(obj) {
+  let coords = obj.getBoundingClientRect();
+  coordsOfMovingObjX = coords.left;
+  coordsOfMovingObjY = coords.top;
 }
 
 function enterDroppable(obj) {
@@ -210,13 +232,16 @@ function leaveDroppable(obj) {
 }
 
 function cancelDragstart() {
-  if (!moveObjects) return;
+  if (!movableObjects) return;
 
-  moveObjects.ondragstart = function () {
+  movableObjects.ondragstart = function () {
     return false;
   };
 }
 
 function onReset() {
   outputText.innerHTML = "";
+  data.currentText = "";
+  data.textArr = [];
+  localStorage.removeItem(storageKey);
 }
