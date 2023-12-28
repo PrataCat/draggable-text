@@ -1,3 +1,5 @@
+"use strict";
+
 const appForm = document.getElementById("appform");
 const userText = document.getElementById("usertext");
 const outputText = document.getElementById("output");
@@ -27,7 +29,7 @@ let currentDroppable = null;
 getSerializedData();
 
 //----------------EventListeners---------------------------
-userText.addEventListener("input", _.throttle(setCurrentText, 1000));
+userText.addEventListener("input", _.throttle(setCurrentText, 500));
 appForm.addEventListener("submit", onSubmit);
 resetBtn.addEventListener("click", onReset);
 
@@ -35,7 +37,7 @@ resetBtn.addEventListener("click", onReset);
 
 function onSubmit(e) {
   e.preventDefault();
-  let { currentText, textArr, lastAddedText } = data;
+  let { currentText } = data;
 
   if (currentText.trim() === "") {
     alert("The field must be filled");
@@ -44,7 +46,7 @@ function onSubmit(e) {
 
   const arr = currentText.split("");
   data.lastAddedText = [...arr];
-  textArr.push(...arr);
+  data.textArr.push(...arr);
 
   try {
     data.currentText = "";
@@ -79,7 +81,7 @@ function getSerializedData() {
       data.currentText = parsedData.currentText;
       data.textArr = parsedData.textArr;
 
-      if (parsedData.textArr.length !== 0) {
+      if (parsedData.textArr && parsedData.textArr.length !== 0) {
         createMarkup(parsedData.textArr);
         addListenerOnLetter();
       }
